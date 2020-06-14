@@ -2,6 +2,7 @@ import pytest
 from selenium.webdriver.common.by import By
 import time
 from selenium import webdriver
+from selenium.webdriver.support.select import Select
 
 
 class Test_Demo:
@@ -65,7 +66,7 @@ class Test_Demo:
         driver.find_element(By.XPATH, "//span[contains(text(),'Create an Account')]").click()
         driver.find_element(By.ID, "firstname").send_keys("Meko")
         driver.find_element(By.ID, "lastname").send_keys("Meka")
-        driver.find_element(By.ID, "email_address").send_keys("deidei167@test.com")
+        driver.find_element(By.ID, "email_address").send_keys("deidei187@test.com")
         driver.find_element(By.ID, "password").send_keys("moimoi123")
         driver.find_element(By.ID, "confirmation").send_keys("moimoi123")
         driver.find_element(By.XPATH, "//span[contains(text(),'Register')]").click()
@@ -77,8 +78,8 @@ class Test_Demo:
                                           "Store.')]").text
         try:
             assert expMessage == confMessage
-        except AssertionError:
-            print("Registration is not done")
+        except AssertionError as msg:
+            print(msg)
 
         driver.find_element(By.XPATH, "//a[contains(text(),'TV')]").click()
         driver.find_element(By.XPATH, "//li[1]//div[1]//div[3]//ul[1]//li[1]//a[1]").click()
@@ -95,3 +96,64 @@ class Test_Demo:
             assert expWishlist == actualWishlist
         except AssertionError:
             print("Wishlist is not shared")
+
+    def test_case_6(self, test_setUp):
+        """Verify user is able to purchase product using registered email id(USE CHROME BROWSER)"""
+        driver.find_element(By.XPATH, "//div[@class='footer']//a[contains(text(),'My Account')]").click()
+        driver.find_element(By.ID, "email").clear()
+        driver.find_element(By.ID, "email").send_keys("deidei187@test.com")
+        driver.find_element(By.ID, "pass").send_keys("moimoi123")
+        driver.find_element(By.XPATH, "//span[contains(text(),'Login')]").click()
+        driver.find_element(By.XPATH, "//div[@class='block-content']//a[contains(text(),'My Wishlist')]").click()
+        driver.find_element(By.XPATH, "//span[contains(text(),'Add to Cart')]").click()
+        drpCountry = Select(driver.find_element(By.ID, "country"))
+        drpCountry.select_by_visible_text("United States")
+        drpState = Select(driver.find_element(By.ID, "region_id"))
+        drpState.select_by_visible_text("New York")
+        driver.find_element(By.ID, "postcode").send_keys("542896")
+        driver.find_element(By.XPATH, "//span[contains(text(),'Estimate')]").click()
+
+        # Verify Shipping cost is generated
+        shipping = driver.find_element(By.XPATH, "//label[contains(text(),'Fixed')]").text
+        try:
+            assert shipping == "Fixed - $5.00"
+        except AssertionError:
+            print(shipping, "Is the correct text")
+        driver.find_element(By.ID, "s_method_flatrate_flatrate").click()
+        driver.find_element(By.XPATH, "//span[contains(text(),'Update Total')]").click()
+
+        # Verify Shipping cost is added to total
+        vShippingCost = driver.find_element(By.XPATH,
+                                            "//td[contains(text(),'Shipping & Handling (Flat Rate - Fixed)')]").text
+        try:
+            assert vShippingCost == "SHIPPING & HANDLING (FLAT RATE - FIXED)"
+        except AssertionError:
+            print(vShippingCost, "is not added to total")
+
+        driver.find_element(By.XPATH, "(//button[@title='Proceed to Checkout'])[2]").click()
+        driver.find_element(By.ID, "billing:firstname").send_keys("meko")
+        driver.find_element(By.ID, "billing:lastname").send_keys("meka")
+        driver.find_element(By.ID, "billing:street1").send_keys("3 ththtkkdd")
+        driver.find_element(By.ID, "billing:city").send_keys("New york")
+        drpStatePrv = Select(driver.find_element(By.ID, "billing:region_id"))
+        drpStatePrv.select_by_visible_text("New York")
+        driver.find_element(By.ID, "billing:postcode").send_keys("589923")
+        drpBillCountry = Select(driver.find_element(By.ID, "billing:country_id"))
+        drpBillCountry.select_by_visible_text("Unites States")
+        driver.find_element(By.ID, "billing:telephone").send_keys("712678999")
+        driver.find_element(By.XPATH, "(//SPAN[text()='Continue'][text()='Continue'])[1]").click()
+        driver.find_element(By.XPATH, "//SPAN[@xpath='1'][text()='Continue']").click()
+        driver.find_element(By.ID, "p_method_checkmo").click()
+        driver.find_element(By.XPATH, "(//SPAN[text()='Continue'][text()='Continue'])[4]").click()
+        driver.find_element(By.XPATH, "//span[contains(text(),'Place Order')]").click()
+
+        # Verify Order is generated
+        orderRec = driver.find_element(By.XPATH, "//h1[contains(text(),'Your order has been received.')]").text
+        try:
+            assert orderRec == "Your order has been received."
+        except AssertionError as e:
+            print(e)
+            print("Order placed successfully")
+
+
+
