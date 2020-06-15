@@ -3,6 +3,8 @@ from selenium.webdriver.common.by import By
 import time
 from selenium import webdriver
 from selenium.webdriver.support.select import Select
+from PythonFrameowrk_1.pages.loginPgae import LoginPage
+from PythonFrameowrk_1.Locators.locators import Locators
 
 
 class Test_Demo:
@@ -22,33 +24,28 @@ class Test_Demo:
 
     def test_case_4(self, test_setUp):
         """Verify that you are able to compare two products"""
-        driver.find_element(By.XPATH, "//a[contains(text(),'Mobile')]").click()
-        driver.find_element(By.XPATH, "//li[1]//div[1]//div[3]//ul[1]//li[2]//a[1]").click()
-        driver.find_element(By.XPATH, "//li[2]//div[1]//div[3]//ul[1]//li[2]//a[1]").click()
-        main_window_SONY = driver.find_element(By.XPATH, "//h2[@class='product-name']//a[contains(text(),'Sony "
-                                                         "Xperia')]").text
-        main_window_IPHONE = driver.find_element(By.XPATH,
-                                                 "//h2[@class='product-name']//a[contains(text(),'IPhone')]").text
+        login = LoginPage(driver)
+        login.click_mobile_menu()
+        login.add_sony_xperia_to_compare()
+        login.add_iphone_to_compare()
+        main_window_SONY = driver.find_element(By.XPATH, Locators.main_window_sony).text
+        main_window_IPHONE = driver.find_element(By.XPATH, Locators.main_window_iphone).text
+        print(main_window_SONY, main_window_IPHONE)
+
         windows_before = driver.window_handles[0]
         print(windows_before)
 
-        driver.find_element(By.XPATH, "//button[@class='button']//span//span[contains(text(),'Compare')]").click()
+        login.click_to_compare_button()
         time.sleep(5)
+
         windows_after = driver.window_handles[1]
         driver.switch_to.window(windows_after)
         print(windows_after)
 
-        # Verify Header
-        # expHead = "COMPARE PRODUCTS"
-        # actHead = driver.find_element(By.XPATH, "//h1[contains(text(),'Compare Products')]").text
-        # try:
-        #     assert expHead == actHead
-        # except AssertionError:
-        #     print(expHead, "this is not the correct Header")
-
         # Verify products are reflected in new window
-        new_window_SONY = driver.find_element(By.XPATH, "//a[contains(text(),'Sony Xperia')]").text
-        new_window_IPHONE = driver.find_element(By.XPATH, "//a[contains(text(),'IPhone')]").text
+        new_window_SONY = driver.find_element(By.XPATH, Locators.new_window_sony).text
+        new_window_IPHONE = driver.find_element(By.XPATH, Locators.new_window_iphone).text
+        print(new_window_SONY, new_window_IPHONE)
 
         try:
             assert main_window_SONY == new_window_SONY
@@ -56,7 +53,7 @@ class Test_Demo:
         except AssertionError:
             print("Products are not reflected in new window")
 
-        driver.find_element(By.XPATH, "//span[contains(text(),'Close Window')]").click()
+        login.close_popup_window()
         driver.switch_to.window(windows_before)
         time.sleep(3)
 
@@ -66,7 +63,7 @@ class Test_Demo:
         driver.find_element(By.XPATH, "//span[contains(text(),'Create an Account')]").click()
         driver.find_element(By.ID, "firstname").send_keys("Meko")
         driver.find_element(By.ID, "lastname").send_keys("Meka")
-        driver.find_element(By.ID, "email_address").send_keys("deidei187@test.com")
+        driver.find_element(By.ID, "email_address").send_keys("deidei191@test.com")
         driver.find_element(By.ID, "password").send_keys("moimoi123")
         driver.find_element(By.ID, "confirmation").send_keys("moimoi123")
         driver.find_element(By.XPATH, "//span[contains(text(),'Register')]").click()
@@ -101,7 +98,7 @@ class Test_Demo:
         """Verify user is able to purchase product using registered email id(USE CHROME BROWSER)"""
         driver.find_element(By.XPATH, "//div[@class='footer']//a[contains(text(),'My Account')]").click()
         driver.find_element(By.ID, "email").clear()
-        driver.find_element(By.ID, "email").send_keys("deidei187@test.com")
+        driver.find_element(By.ID, "email").send_keys("deidei191@test.com")
         driver.find_element(By.ID, "pass").send_keys("moimoi123")
         driver.find_element(By.XPATH, "//span[contains(text(),'Login')]").click()
         driver.find_element(By.XPATH, "//div[@class='block-content']//a[contains(text(),'My Wishlist')]").click()
@@ -139,9 +136,10 @@ class Test_Demo:
         drpStatePrv.select_by_visible_text("New York")
         driver.find_element(By.ID, "billing:postcode").send_keys("589923")
         drpBillCountry = Select(driver.find_element(By.ID, "billing:country_id"))
-        drpBillCountry.select_by_visible_text("Unites States")
+        drpBillCountry.select_by_visible_text("United States")
         driver.find_element(By.ID, "billing:telephone").send_keys("712678999")
         driver.find_element(By.XPATH, "(//SPAN[text()='Continue'][text()='Continue'])[1]").click()
+        time.sleep(3)
         driver.find_element(By.XPATH, "//SPAN[@xpath='1'][text()='Continue']").click()
         driver.find_element(By.ID, "p_method_checkmo").click()
         driver.find_element(By.XPATH, "(//SPAN[text()='Continue'][text()='Continue'])[4]").click()
@@ -154,6 +152,3 @@ class Test_Demo:
         except AssertionError as e:
             print(e)
             print("Order placed successfully")
-
-
-
