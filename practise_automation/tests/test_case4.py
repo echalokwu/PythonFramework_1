@@ -3,8 +3,11 @@ from selenium.webdriver.common.by import By
 import time
 from selenium import webdriver
 from selenium.webdriver.support.select import Select
+import sys; print('Python %s on %s' % (sys.version, sys.platform))
+sys.path.extend(['/Users/echalo/Desktop/AutomationTesting'])
 from PythonFrameowrk_1.pages.loginPgae import LoginPage
 from PythonFrameowrk_1.Locators.locators import Locators
+from PythonFrameowrk_1.pages.homePage import HomePage
 
 
 class Test_Demo:
@@ -28,6 +31,7 @@ class Test_Demo:
         login.click_mobile_menu()
         login.add_sony_xperia_to_compare()
         login.add_iphone_to_compare()
+
         main_window_SONY = driver.find_element(By.XPATH, Locators.main_window_sony).text
         main_window_IPHONE = driver.find_element(By.XPATH, Locators.main_window_iphone).text
         print(main_window_SONY, main_window_IPHONE)
@@ -37,7 +41,6 @@ class Test_Demo:
 
         login.click_to_compare_button()
         time.sleep(5)
-
         windows_after = driver.window_handles[1]
         driver.switch_to.window(windows_after)
         print(windows_after)
@@ -59,35 +62,36 @@ class Test_Demo:
 
     def test_case_5(self, test_setUp):
         """Verify you can create account in E-commerce site and can share wishes to other people using email"""
-        driver.find_element(By.XPATH, "//div[@class='footer']//a[contains(text(),'My Account')]").click()
-        driver.find_element(By.XPATH, "//span[contains(text(),'Create an Account')]").click()
-        driver.find_element(By.ID, "firstname").send_keys("Meko")
-        driver.find_element(By.ID, "lastname").send_keys("Meka")
-        driver.find_element(By.ID, "email_address").send_keys("deidei191@test.com")
-        driver.find_element(By.ID, "password").send_keys("moimoi123")
-        driver.find_element(By.ID, "confirmation").send_keys("moimoi123")
-        driver.find_element(By.XPATH, "//span[contains(text(),'Register')]").click()
+        login = LoginPage(driver)
+        login.click_myAccount_Link()
+        login.click_create_account_Link()
+        login.enterFirstName("meka")
+        login.enterLastName("meko")
+        login.enterEmailAddress("test464@test.com")
+        login.enterPassword("moimoi123")
+        login.confPassword("moimoi123")
+        login.click_register()
+        time.sleep(3)
 
         # Verify Registration is done
         expMessage = "Thank you for registering with Main Website Store."
-        confMessage = driver.find_element(By.XPATH,
-                                          "//span[contains(text(),'Thank you for registering with Main Website "
-                                          "Store.')]").text
+        actualMessage = driver.find_element(By.XPATH, Locators.confMessage).text
         try:
-            assert expMessage == confMessage
+            assert expMessage == actualMessage
         except AssertionError as msg:
             print(msg)
 
-        driver.find_element(By.XPATH, "//a[contains(text(),'TV')]").click()
-        driver.find_element(By.XPATH, "//li[1]//div[1]//div[3]//ul[1]//li[1]//a[1]").click()
-        driver.find_element(By.XPATH, "//span[contains(text(),'Share Wishlist')]").click()
-        driver.find_element(By.ID, "email_address").send_keys("iwe67@yahoo.com")
-        driver.find_element(By.ID, "message").send_keys("testing")
-        driver.find_element(By.XPATH, "//span[contains(text(),'Share Wishlist')]").click()
+        homepage = HomePage(driver)
+        homepage.click_tv_menu()
+        homepage.click_to_add_product_WishList()
+        homepage.click_to_share_WishList()
+        homepage.enter_WishList_email("iwe@test.com")
+        homepage.enter_WishList_message("testing")
+        homepage.click_to_share_WishList()
 
         # Verify Wishlist is Shared
         expWishlist = "Your Wishlist has been shared."
-        actualWishlist = driver.find_element(By.XPATH, "//span[contains(text(),'Your Wishlist has been shared.')]").text
+        actualWishlist = driver.find_element(By.XPATH, Locators.actualWishlist).text
 
         try:
             assert expWishlist == actualWishlist
@@ -96,12 +100,15 @@ class Test_Demo:
 
     def test_case_6(self, test_setUp):
         """Verify user is able to purchase product using registered email id(USE CHROME BROWSER)"""
-        driver.find_element(By.XPATH, "//div[@class='footer']//a[contains(text(),'My Account')]").click()
-        driver.find_element(By.ID, "email").clear()
-        driver.find_element(By.ID, "email").send_keys("deidei191@test.com")
-        driver.find_element(By.ID, "pass").send_keys("moimoi123")
-        driver.find_element(By.XPATH, "//span[contains(text(),'Login')]").click()
-        driver.find_element(By.XPATH, "//div[@class='block-content']//a[contains(text(),'My Wishlist')]").click()
+        login = LoginPage(driver)
+        homepage = HomePage(driver)
+        login.click_myAccount_Link()
+        login.enter_registered_email("test464@test.com")
+        login.enter_registered_password("moimoi123")
+        login.click_login_button()
+        time.sleep(3)
+        homepage.click_my_wishList()
+
         driver.find_element(By.XPATH, "//span[contains(text(),'Add to Cart')]").click()
         drpCountry = Select(driver.find_element(By.ID, "country"))
         drpCountry.select_by_visible_text("United States")
@@ -138,17 +145,17 @@ class Test_Demo:
         drpBillCountry = Select(driver.find_element(By.ID, "billing:country_id"))
         drpBillCountry.select_by_visible_text("United States")
         driver.find_element(By.ID, "billing:telephone").send_keys("712678999")
-        driver.find_element(By.XPATH, "(//SPAN[text()='Continue'][text()='Continue'])[1]").click()
-        time.sleep(3)
-        driver.find_element(By.XPATH, "//SPAN[@xpath='1'][text()='Continue']").click()
+        driver.find_element(By.XPATH, "//div[@id='billing-buttons-container']//button[@class='button']//span//span["
+                                      "contains(text(),'Continue')]").click()
+        driver.find_element(By.XPATH, "//div[@id='shipping-method-buttons-container']//button["
+                                      "@class='button']//span//span[contains(text(),'Continue')]").click()
         driver.find_element(By.ID, "p_method_checkmo").click()
-        driver.find_element(By.XPATH, "(//SPAN[text()='Continue'][text()='Continue'])[4]").click()
+        driver.find_element(By.XPATH, "(//BUTTON[@type='button'])[4]").click()
         driver.find_element(By.XPATH, "//span[contains(text(),'Place Order')]").click()
 
         # Verify Order is generated
-        orderRec = driver.find_element(By.XPATH, "//h1[contains(text(),'Your order has been received.')]").text
+        orderRec = driver.find_element(By.XPATH, "//H2[@class='sub-title'][text()='Thank you for your purchase!']").text
         try:
-            assert orderRec == "Your order has been received."
-        except AssertionError as e:
-            print(e)
-            print("Order placed successfully")
+            assert orderRec == "THANK YOU FOR YOUR PURCHASE!"
+        except AssertionError:
+            print("Order not placed successfully")
